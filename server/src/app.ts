@@ -33,3 +33,5 @@ app.use('/api/tasks', requireAuth, taskRouter)
 
 app.use(notFoundHandler)
 app.use(errorHandler)
+
+export default app

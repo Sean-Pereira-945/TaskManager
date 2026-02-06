@@ -140,6 +140,11 @@ button {
   transition: transform 200ms ease, box-shadow 200ms ease;
 }
 
+.auth-form button,
+.auth-toggle button {
+  border-radius: 14px;
+}
+
 button:disabled {
   opacity: 0.6;
   cursor: not-allowed;

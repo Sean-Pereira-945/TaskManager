@@ -2,6 +2,8 @@
 
 This project fulfills the Global Trend Full Stack Development Internship assignment by shipping a responsive Kanban board, a type-safe REST API, and persistent PostgreSQL storage plus several bonus capabilities (authentication, filters, deployment guide, documentation, and enhanced UX cues such as due-date countdowns).
 
+##Live Demo: https://task-manager-4lc2.vercel.app/
+
 ## Assignment Coverage
 
 | Requirement (brief) | Implementation in this repo |
@@ -145,6 +147,7 @@ All responses follow `{ data, meta? }` envelopes and return structured error pay
    - Verify CORS: ensure `CLIENT_ORIGIN` matches the client URL.
    - Run through auth, CRUD, and countdown flows on the production URLs.
    - Monitor Vercel logs (API) + inspector (client) for environment mismatches.
+     
 
 ## Next Steps
 

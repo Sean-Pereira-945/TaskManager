@@ -1,6 +1,6 @@
 # Task Manager
 
-This project fulfills the Global Trend Full Stack Development Internship assignment by shipping a responsive Kanban board, a type-safe REST API, and persistent PostgreSQL storage plus several bonus capabilities (authentication, filters, deployment guide, documentation, and enhanced UX cues such as due-date countdowns).
+This project fulfills the full stack development internship brief by shipping a responsive Kanban board, a type-safe REST API, and persistent PostgreSQL storage plus several bonus capabilities (authentication, filters, deployment guide, documentation, and enhanced UX cues such as due-date countdowns).
 
 ##Live Demo: https://task-manager-4lc2.vercel.app/
 
@@ -49,6 +49,7 @@ This project fulfills the Global Trend Full Stack Development Internship assignm
    | `DATABASE_URL` | server | Postgres/Neon connection string. |
    | `JWT_SECRET`, `JWT_EXPIRES_IN` | server | Token signing + lifetime. |
    | `GOOGLE_CLIENT_ID` | server | Verifies Google Identity tokens. |
+   | Email reminder SMTP vars | server | `EMAIL_SMTP_HOST`, `EMAIL_SMTP_PORT`, `EMAIL_SMTP_USER`, `EMAIL_SMTP_PASS`, `EMAIL_FROM`, and optional `EMAIL_SMTP_SECURE` enable 12-hour reminder emails. |
    | `CLIENT_ORIGIN` | server | Allowed origin for CORS + cookies. |
    | `VITE_API_URL` | client | Base URL to the API (`http://localhost:4000/api` locally). |
    | `VITE_GOOGLE_CLIENT_ID` | client | Renders Google button in the UI. |
@@ -122,6 +123,10 @@ Base URL defaults to `http://localhost:4000/api`. All `/tasks` endpoints require
 | DELETE | `/tasks/:id` | Permanently remove a task. |
 
 All responses follow `{ data, meta? }` envelopes and return structured error payloads for validation failures or auth issues.
+
+## Background Automation
+
+- An hourly reminder scheduler scans for tasks due in roughly 12 hours and emails the assigned teammate when SMTP credentials are configured. Each task fires once, and reminders are skipped if the assignee, due date, or status changes after completion.
 
 ## Frontend Highlights
 

@@ -12,6 +12,9 @@ const buildQueryString = (query: TaskQueryState) => {
     params.set('search', query.search.trim())
   }
   params.set('sort', query.sort)
+  if (query.projectId) {
+    params.set('projectId', query.projectId)
+  }
   const serialized = params.toString()
   return serialized ? `?${serialized}` : ''
 }

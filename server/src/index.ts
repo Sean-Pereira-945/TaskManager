@@ -3,12 +3,14 @@ import 'dotenv/config'
 import { app } from './app'
 import { env } from './config/env'
 import { bootstrapDatabase } from './lib/bootstrap'
+import { startTaskReminderScheduler } from './jobs/taskReminder'
 
 const port = env.PORT
 
 const start = async () => {
   try {
     await bootstrapDatabase()
+    startTaskReminderScheduler()
     app.listen(port, () => {
       console.log(`API ready on http://localhost:${port}`)
     })

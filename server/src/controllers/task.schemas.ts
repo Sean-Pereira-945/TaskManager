@@ -20,6 +20,13 @@ const baseTaskSchema = z.object({
       z.null(),
     ])
     .optional(),
+  projectId: z.string().uuid('Select a valid project'),
+  assigneeId: z
+    .union([
+      z.string().uuid('Select a valid teammate'),
+      z.null(),
+    ])
+    .optional(),
 })
 
 export const createTaskSchema = baseTaskSchema.partial({ status: true })
@@ -35,6 +42,7 @@ export const listTasksQuerySchema = z.object({
   status: statusEnum.optional(),
   search: z.string().optional(),
   sort: z.enum(['newest', 'oldest', 'title']).optional().default('newest'),
+  projectId: z.string().uuid('Invalid project id').optional(),
 })
 
 export type CreateTaskInput = z.infer<typeof createTaskSchema>

@@ -1,6 +1,6 @@
 # Client Setup
 
-The React application inside this `client` folder is part of the Global Trend Task Manager project.
+The React application inside this `client` folder is part of the Task Manager project.
 
 ## Getting Started
 

@@ -6,6 +6,7 @@ import { env } from './config/env'
 import { requireAuth } from './middleware/auth'
 import { errorHandler, notFoundHandler } from './middleware/errorHandler'
 import authRouter from './routes/auth.routes'
+import projectRouter from './routes/project.routes'
 import taskRouter from './routes/task.routes'
 
 const allowedOrigins = env.CLIENT_ORIGIN
@@ -29,6 +30,7 @@ app.get('/api/health', (_req, res) => {
 })
 
 app.use('/api/auth', authRouter)
+app.use('/api/projects', requireAuth, projectRouter)
 app.use('/api/tasks', requireAuth, taskRouter)
 
 app.use(notFoundHandler)

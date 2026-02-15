@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { type CSSProperties, type ChangeEvent, useEffect, useState } from 'react'
 
 import type { Task, TaskStatus } from '../types/task'
 
@@ -7,18 +7,20 @@ type TaskCardProps = {
   onEdit: (task: Task) => void
   onDelete: (taskId: string) => void
   onStatusChange: (taskId: string, nextStatus: TaskStatus) => Promise<void> | void
+  canMarkDone: boolean
+  onCompletionBlocked?: () => void
 }
 
 const statusLabels: Record<TaskStatus, string> = {
-  TODO: 'Backlog',
-  IN_PROGRESS: 'In Progress',
-  DONE: 'Complete',
+  TODO: 'TODO',
+  IN_PROGRESS: 'IN PROGRESS',
+  DONE: 'DONE',
 }
 
 const statusAccent: Record<TaskStatus, string> = {
-  TODO: '#f97316',
-  IN_PROGRESS: '#0ea5e9',
-  DONE: '#10b981',
+  TODO: '#ff006e',
+  IN_PROGRESS: '#ffd60a',
+  DONE: '#06ffa5',
 }
 
 const formatDate = (value: string) =>
@@ -56,7 +58,7 @@ const formatDueCountdown = (dueDate: string) => {
   }
 }
 
-const TaskCard = ({ task, onEdit, onDelete, onStatusChange }: TaskCardProps) => {
+const TaskCard = ({ task, onEdit, onDelete, onStatusChange, canMarkDone, onCompletionBlocked }: TaskCardProps) => {
   const [dueMeta, setDueMeta] = useState(() => (task.dueDate ? formatDueCountdown(task.dueDate) : null))
 
   useEffect(() => {
@@ -72,48 +74,83 @@ const TaskCard = ({ task, onEdit, onDelete, onStatusChange }: TaskCardProps) => 
     return () => window.clearInterval(intervalId)
   }, [task.dueDate])
 
+  const style = {
+    '--task-accent': statusAccent[task.status],
+  } as CSSProperties
+
+  const countdownLabel = dueMeta ? dueMeta.label.split(' ').slice(0, 3).join(' ') : null
+
+  const handleStatusChange = (event: ChangeEvent<HTMLSelectElement>) => {
+    const nextStatus = event.target.value as TaskStatus
+    if (nextStatus === 'DONE' && !canMarkDone) {
+      onCompletionBlocked?.()
+      return
+    }
+    onStatusChange(task.id, nextStatus)
+  }
+
   return (
-    <article className="task-card" data-status={task.status}>
-      <header>
-        <p className="eyebrow" style={{ color: statusAccent[task.status] }}>
-          {statusLabels[task.status]}
-        </p>
-        <button type="button" className="ghost" onClick={() => onEdit(task)}>
+    <article className="task-card" data-status={task.status} style={style}>
+      <span className="task-status-badge">{statusLabels[task.status]}</span>
+      <h3 className="task-title">{task.title}</h3>
+      <p className="task-description">{task.description}</p>
+      <div className="task-labels">
+        <span className="task-project-pill">{task.project.name}</span>
+        <span className="task-assignee-pill">{task.assignee ? task.assignee.name ?? task.assignee.email : 'Unassigned'}</span>
+      </div>
+
+      <div className="task-meta">
+        {task.dueDate ? (
+          <div className="task-due">
+            {dueMeta && (
+              <span className={`overdue ${dueMeta.overdue ? 'active' : ''}`}>
+                {dueMeta.overdue ? `⚠ Overdue by ${countdownLabel}` : `Due in ${countdownLabel}`}
+              </span>
+            )}
+            <span className="task-due-date">
+              {dueMeta?.exact ?? new Intl.DateTimeFormat('en-US', {
+                month: 'short',
+                day: 'numeric',
+                year: 'numeric',
+                hour: 'numeric',
+                minute: '2-digit',
+              }).format(new Date(task.dueDate))}
+            </span>
+          </div>
+        ) : (
+          <div className="task-due task-due--empty">No due date set</div>
+        )}
+        <div className="task-created">Created: {formatDate(task.createdAt)}</div>
+        {task.completedAt && (
+          <div className="task-created">Completed: {new Intl.DateTimeFormat('en', {
+            month: 'short',
+            day: 'numeric',
+            hour: 'numeric',
+            minute: '2-digit',
+          }).format(new Date(task.completedAt))}</div>
+        )}
+      </div>
+
+      <div className="task-actions">
+        <button type="button" className="task-btn" onClick={() => onEdit(task)}>
           Edit
         </button>
-      </header>
-      <h3>{task.title}</h3>
-      <p className="task-card__description">{task.description}</p>
-      {dueMeta && (
-        <div className={`due-pill ${dueMeta.overdue ? 'overdue' : ''}`}>
-          <div>
-            <span>{dueMeta.overdue ? 'Overdue by' : 'Due in'}</span>
-            <strong>{dueMeta.label}</strong>
-          </div>
-          <small>{dueMeta.exact}</small>
-        </div>
-      )}
-      <footer>
-        <div className="task-card__meta">
-          <label>
-            <span>Status</span>
-            <select value={task.status} onChange={(event) => onStatusChange(task.id, event.target.value as TaskStatus)}>
-              {Object.entries(statusLabels).map(([status, label]) => (
-                <option key={status} value={status}>
-                  {label}
-                </option>
-              ))}
-            </select>
-          </label>
-          <div className="timestamp">
-            <span>Created</span>
-            <strong>{formatDate(task.createdAt)}</strong>
-          </div>
-        </div>
-        <button type="button" className="danger" onClick={() => onDelete(task.id)}>
-          Remove
-        </button>
-      </footer>
+        <label className="status-select">
+          <span>Update status</span>
+          <select value={task.status} onChange={handleStatusChange}>
+            {Object.entries(statusLabels).map(([status, label]) => (
+              <option key={status} value={status}>
+                {label}
+              </option>
+            ))}
+          </select>
+          {!canMarkDone && <small>Only owners can mark tasks as done.</small>}
+        </label>
+      </div>
+
+      <button type="button" className="remove-btn" onClick={() => onDelete(task.id)}>
+        Remove
+      </button>
     </article>
   )
 }
